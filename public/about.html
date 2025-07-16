@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* About Section Styles */
+        /* About Section Styles */
+        .about-section {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .about-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .about-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .about-tagline {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .about-content {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-text {
+            flex: 1;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #34495e;
+        }
+
+        .about-text p {
+            margin-bottom: 15px;
+        }
+
+        .about-highlights {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .highlight-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .highlight-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .highlight-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .highlight-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .highlight-card p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .about-content {
+                flex-direction: column;
+            }
+
+            .about-highlights {
+                width: 100%;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .about-highlights {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="about-section">
+        <div class="about-container">
+            <h2 class="about-title">About StudySphere</h2>
+            <p class="about-tagline">Your smart academic companion</p>
+
+            <div class="about-content">
+                <div class="about-text">
+                    <p>StudySphere helps students organize their academic life with powerful yet simple tools. We
+                        combine task management, note-taking, and resource organization in one platform.</p>
+                    <p>Founded in 2025, our mission is to reduce student stress through better organization and access
+                        to quality learning tools.</p>
+                </div>
+
+                <div class="about-highlights">
+                    <div class="highlight-card">
+                        <span class="highlight-icon">📚</span>
+                        <h3>All-in-One Platform</h3>
+                        <p>Everything you need for academic success in one place</p>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-icon">⏱</span>
+                        <h3>Save Time</h3>
+                        <p>Spend less time organizing and more time learning</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GCS Bucket Manager</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f7f9fc;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            border-left: 5px solid #0077cc;
+            padding-left: 10px;
+            color: #0077cc;
+            margin-top: 30px;
+        }
+
+        input[type="text"],
+        select,
+        input[type="file"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: auto;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 15px;
+            background-color: #0077cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .file-card {
+            background-color: #f1f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+        }
+
+        .file-card a {
+            text-decoration: none;
+            color: #0077cc;
+            font-weight: bold;
+        }
+
+        .file-card a:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📂 Google Cloud Storage Bucket Manager</h1>
+
+        <div class="section">
+            <h2>Create a Folder</h2>
+            <input type="text" id="folderInput" placeholder="Enter folder name">
+            <button onclick="createFolder()">Create Folder</button>
+        </div>
+
+        <div class="section">
+            <h2>Upload File to Selected Folder</h2>
+            <label for="folderSelect">Select Folder:</label>
+            <select id="folderSelect">
+                <option value="">(root)</option>
+            </select>
+            <br><br>
+            <input type="file" id="fileInput"><br><br>
+            <button onclick="uploadFile()">Upload</button>
+        </div>
+
+        <div class="section">
+            <h2>View Uploaded Files</h2>
+            <input type="text" id="searchInput" placeholder="Search files..." onkeyup="filterFiles()"
+                style="width: 100%; margin-top: 10px; margin-bottom: 15px;">
+            <div class="file-grid" id="fileList"></div>
+        </div>
+    </div>
+
+    <script>
+        const bucketName = "studyspherewd";
+
+        async function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const folderSelect = document.getElementById("folderSelect");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file");
+                return;
+            }
+
+            let folder = folderSelect.value;
+            if (folder && !folder.endsWith("/")) folder += "/";
+
+            const objectName = folder + file.name;
+            const uploadUrl = `https://storage.googleapis.com/upload/storage/v1/b/${bucketName}/o?uploadType=media&name=${encodeURIComponent(objectName)}`;
+
+            const res = await fetch(uploadUrl, {
+                method: "POST",
+                headers: { "Content-Type": file.type },
+                body: file
+            });
+
+            if (res.ok) {
+                alert("File uploaded!");
+                listFiles();
+                listFolders();
+            } else {
+                alert("Upload failed");
+                console.error(await res.text());
+            }
+        }
+
+        async function listFiles() {
+            const res = await fetch(`https://storage.googleapis.com/storage/v1/b/${bucketName}/o`);
+            const data = await res.json();
+
+            const fileList = document.getElementById("fileList");
+            fileList.innerHTML = "";
+
+            if (data.items) {
+                data.items.forEach(item => {
+                    if (!item.name.endsWith("/")) {
+                        const card = document.createElement("div");
+                        card.className = "file-card";
+
+                        const link = document.createElement("a");
+                        link.href = `https://storage.googleapis.com/${bucketName}/${item.name}`;
+                        link.textContent = item.name;
+                        link.target = "_blank";
+
+                        card.appendChild(link);
+                        fileList.appendChild(card);
+                    }
+                });
+            } else {
+                fileList.innerHTML = "<p>No files found.</p>";
+            }
+        }
+
+        function createFolder() {
+            const folderName = document.getElementById("folderInput").value.trim();
+            if (!folderName) {
+                alert("Folder name cannot be empty");
+                return;
+            }
+
+            const folderPath = folderName.endsWith("/") ? folderName : folderName + "/";
+            const url = `https://storage.googleapis.com/upload/storage/v1/b/${bucketName}/o?uploadType=media&name=${encodeURIComponent(folderPath)}`;
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: ""
+            }).then(res => {
+                if (res.ok) {
+                    alert("Folder created!");
+                    listFolders();
+                } else {
+                    alert("Failed to create folder");
+                }
+            });
+        }
+
+        async function listFolders() {
+            const res = await fetch(`https://storage.googleapis.com/storage/v1/b/${bucketName}/o`);
+            const data = await res.json();
+
+            const folders = new Set();
+            const folderSelect = document.getElementById("folderSelect");
+            folderSelect.innerHTML = '<option value="">(root)</option>';
+
+            if (data.items) {
+                data.items.forEach(item => {
+                    const parts = item.name.split("/");
+                    if (parts.length > 1) folders.add(parts[0]);
+                });
+
+                folders.forEach(folder => {
+                    const option = document.createElement("option");
+                    option.value = folder;
+                    option.textContent = folder;
+                    folderSelect.appendChild(option);
+                });
+            }
+        }
+
+        function filterFiles() {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+            const fileCards = document.querySelectorAll(".file-card");
+
+            fileCards.forEach(card => {
+                const fileName = card.querySelector("a").textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+
+        window.onload = () => {
+            listFiles();
+            listFolders();
+        };
+    </script>
+</body>
+
+</html>
